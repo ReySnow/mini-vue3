@@ -1,4 +1,4 @@
-import { effect } from '../effect';
+import { effect, stop } from '../effect';
 import { reactive } from '../reacticve'
 describe('effect', () => {
     it('happy', () => {
@@ -42,6 +42,21 @@ describe('effect', () => {
         // 执行run方法后调用了fn
         run()
         expect(dummy).toBe(2)
+    })
+    it('stop', () => {
+        let dummy;
+        const obj = reactive({ prop: 1 })
+        const runner = effect(() => {
+            dummy = obj.prop
+        })
+        obj.prop = 2
+        expect(dummy).toBe(2)
+        stop(runner)
+        obj.prop = 3
+        expect(dummy).toBe(2)
+
+        runner()
+        expect(dummy).toBe(3)
     })
     it('should first', () => {
         expect(1).toBe(1)
