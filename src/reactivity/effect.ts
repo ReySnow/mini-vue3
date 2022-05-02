@@ -1,8 +1,10 @@
+import { extend } from "./shared";
 
 class ReactiveEffect {
     private _fn: any;
     deps = []
     active = true
+    onStop?: () => void
     constructor(fn, public scheduler?) {
         this._fn = fn
     }
@@ -14,6 +16,9 @@ class ReactiveEffect {
         // 首次调用清空effect
         if (this.active) {
             cleanupEffect(this)
+            if (this.onStop) {
+                this.onStop()
+            }
             this.active = false
         }
     }
@@ -39,6 +44,8 @@ export function track(target, key) {
         dep = new Set()
         depsMap.set(key, dep)
     }
+    if (!activeEffect) return
+
     dep.add(activeEffect)
     // effect 收集dep
     activeEffect.deps.push(dep)
@@ -62,6 +69,9 @@ export function trigger(target, key) {
 let activeEffect;
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
+
+    extend(_effect, options)
+
     _effect.run()
 
     const runner: any = _effect.run.bind(_effect)
