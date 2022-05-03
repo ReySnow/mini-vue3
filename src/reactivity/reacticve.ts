@@ -26,6 +26,10 @@ export function isReadonly(value) {
     return !!value[ReactiveFlags.IS_READONLY]
 }
 
+export function isProxy(value) {
+    return isReactive(value) || isReadonly(value)
+}
+
 function createActiviteObject(raw: any, baseHandlers) {
     // 创建响应式对象
     return new Proxy(raw, baseHandlers)

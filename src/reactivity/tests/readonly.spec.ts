@@ -1,4 +1,4 @@
-import { isReadonly, readonly } from "../reacticve"
+import { isProxy, isReadonly, readonly } from "../reacticve"
 
 describe('readonly', () => {
     it('should be readonly', () => {
@@ -10,6 +10,7 @@ describe('readonly', () => {
         expect(isReadonly(wrapped.bar)).toBe(true)
         expect(isReadonly(original)).toBe(false)
         expect(isReadonly(original.bar)).toBe(false)
+        expect(isProxy(wrapped)).toBe(true)
     })
     it('should warn when call set', () => {
         console.warn = jest.fn()
