@@ -1,4 +1,4 @@
-import { readonly } from "../reacticve"
+import { isReadonly, readonly } from "../reacticve"
 
 describe('readonly', () => {
     it('should be readonly', () => {
@@ -6,6 +6,8 @@ describe('readonly', () => {
         const wrapped = readonly(original)
         expect(wrapped).not.toBe(original)
         expect(wrapped.foo).toBe(1)
+        expect(isReadonly(wrapped)).toBe(true)
+        expect(isReadonly(original)).toBe(false)
     })
     it('should warn when call set', () => {
         console.warn = jest.fn()
