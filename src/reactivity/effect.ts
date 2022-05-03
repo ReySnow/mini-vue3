@@ -1,16 +1,29 @@
 import { extend } from "../shared";
 
+let activeEffect;
+let shouldTrack;// 是否需要收集依赖， stop
+
 class ReactiveEffect {
     private _fn: any;
     deps = []
-    active = true
+    active = true;// 不是stop状态
     onStop?: () => void
     constructor(fn, public scheduler?) {
         this._fn = fn
     }
     run() {
+        // 会收集依赖
+        // shouTrack 做区分
+        if (!this.active) {
+            return this._fn()
+        }
+
+        shouldTrack = true
         activeEffect = this
-        return this._fn()
+        const result = this._fn()
+        // 重置
+        shouldTrack = false
+        return result
     }
     stop() {
         // 首次调用清空effect
@@ -28,10 +41,13 @@ function cleanupEffect(effect) {
     effect.deps.forEach((dep: any) => {
         dep.delete(effect)
     })
+    effect.deps.length = 0
 }
 
 const targetMap = new Map()
 export function track(target, key) {
+    if (!isTracking()) return
+
     // target -> key -> dep
     let depsMap = targetMap.get(target)
     if (!depsMap) {
@@ -44,11 +60,18 @@ export function track(target, key) {
         dep = new Set()
         depsMap.set(key, dep)
     }
-    if (!activeEffect) return
+
+    // 已经存在dep中
+    if (dep.has(activeEffect)) return
 
     dep.add(activeEffect)
     // effect 收集dep
     activeEffect.deps.push(dep)
+}
+
+// 是否应该收集依赖
+function isTracking() {
+    return shouldTrack && activeEffect !== undefined
 }
 
 export function trigger(target, key) {
@@ -66,7 +89,6 @@ export function trigger(target, key) {
     }
 }
 
-let activeEffect;
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler)
 
