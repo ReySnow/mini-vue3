@@ -9,4 +9,16 @@ describe('reactive', () => {
         expect(isReactive(observed)).toBe(true)
         expect(isReactive(original)).toBe(false)
     })
+    it('should bar be reactive', () => {
+        const original = {
+            bar: {
+                foo: 1
+            },
+            arr: [{ bar: 2 }]
+        }
+        const observed = reactive(original)
+        expect(isReactive(observed.bar)).toBe(true)
+        expect(isReactive(observed.arr)).toBe(true)
+        expect(isReactive(observed.arr[0])).toBe(true)
+    })
 })
