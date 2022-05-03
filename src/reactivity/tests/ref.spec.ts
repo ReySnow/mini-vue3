@@ -1,5 +1,6 @@
 import { effect } from "../effect"
-import { ref } from "../ref"
+import { reactive } from "../reacticve"
+import { isRef, ref, unRef } from "../ref"
 
 describe('ref', () => {
     it('should be ref', () => {
@@ -37,5 +38,20 @@ describe('ref', () => {
         a.value.count = 2 // 执行reactive的set
         // a.value = { count: 2 } // 执行ref的set
         expect(dummy).toBe(2)
+    })
+
+    it('should isRef', () => {
+        const a = ref(1)
+        const user = reactive({
+            age: 1
+        })
+        expect(isRef(a)).toBe(true)
+        expect(isRef(1)).toBe(false)
+        expect(isRef(user)).toBe(false)
+    })
+    it('should unRef', () => {
+        const a = ref(1)
+        expect(unRef(a)).toBe(1)
+        expect(unRef(1)).toBe(1)
     })
 })
