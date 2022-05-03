@@ -50,3 +50,20 @@ export function isRef(value) {
 export function unRef(ref) {
     return isRef(ref) ? ref.value : ref
 }
+
+export function proxyRefs(objectWithRefs) {
+    return new Proxy(objectWithRefs, {
+        get(target, key) {
+            // 是ref 返回 .value
+            return unRef(Reflect.get(target, key))
+        },
+        set(target, key, value) {
+            // 是ref 设置 .value
+            if (isRef(target[key]) && !isRef(value)) {
+                return (target[key].value = value)
+            } else {
+                return Reflect.set(target, key, value)
+            }
+        }
+    })
+}
