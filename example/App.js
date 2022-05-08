@@ -1,4 +1,4 @@
-import { h } from "../lib/mini-vue.esm"
+import { h } from "../lib/mini-vue.esm.js"
 
 export const App = {
     setup() {
@@ -7,6 +7,17 @@ export const App = {
         }
     },
     render() {
-        return h('div', 'hi' + this.msg)
+        return h(
+            'div',
+            {
+                id: 'root',
+                class: 'red'
+            },
+            // 'hi' + this.msg
+            [
+                h('p', { class: 'red' }, 'hi'),
+                h('p', { class: 'blue' }, 'mini-vue'),
+            ]
+        )
     }
 }
