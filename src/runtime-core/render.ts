@@ -24,7 +24,7 @@ function processElement(vnode: any, container: any) {
 function mountElement(vnode: any, container: any) {
     const { children, props, type } = vnode
     // type = div p span
-    const el = document.createElement(type)
+    const el = vnode.el = document.createElement(type)
 
     if (typeof children === 'string') {
         el.textContent = children
@@ -64,7 +64,10 @@ function mountComponent(vnode: any, container: any) {
 function setupRenderEffect(instance, container) {
     // finishComponent 中设置了render
     // subtree 就是虚拟节点
-    const subtree = instance.render()
+    // 将proxy绑定到this上
+    const subtree = instance.render.call(instance.proxy)
     patch(subtree, container)
+
+    instance.vnode.el = subtree.el
 }
 
