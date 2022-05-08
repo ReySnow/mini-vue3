@@ -1,4 +1,4 @@
-import { extend } from "../shared";
+import { extend } from "../shared/index";
 
 let activeEffect;
 let shouldTrack;// 是否需要收集依赖， stop
@@ -69,7 +69,7 @@ export function trackEffects(dep) {
     if (dep.has(activeEffect)) return
 
     dep.add(activeEffect)
-    // effect 收集dep
+    // effect 收集dep, 是为了可以清空
     activeEffect.deps.push(dep)
 }
 
