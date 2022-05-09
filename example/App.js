@@ -13,7 +13,13 @@ export const App = {
             'div',
             {
                 id: 'root',
-                class: 'red'
+                class: 'red',
+                onClick() {
+                    console.log('click');
+                },
+                onMousedown() {
+                    console.log('mousedown');
+                }
             },
             'hi, ' + this.msg
             // [

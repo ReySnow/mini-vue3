@@ -36,7 +36,13 @@ function mountElement(vnode: any, container: any) {
 
     for (let key in props) {
         const val = props[key]
-        el.setAttribute(key, val)
+        const isOn = (key: string) => /^on[A-Z]/.test(key)
+        if (isOn(key)) {
+            const even = key.slice(2).toLocaleLowerCase()
+            el.addEventListener(even, val)
+        } else {
+            el.setAttribute(key, val)
+        }
     }
     container.append(el)
 }
