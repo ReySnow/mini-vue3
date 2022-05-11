@@ -8,7 +8,7 @@ export function createVNode(type, props?, children?) {
         props,
         children,
         el: null,
-        shapeFlag: getShaeFlage(type)
+        shapeFlag: getShapeFlage(type)
     }
     if (typeof children === 'string') {
         vnode.shapeFlag |= shapeFlags.TEXT_CHILDREN
@@ -19,7 +19,7 @@ export function createVNode(type, props?, children?) {
     return vnode
 }
 
-function getShaeFlage(type: any) {
+function getShapeFlage(type: any) {
     return typeof type === 'string'
         ? shapeFlags.ELELEMT
         : shapeFlags.STATEFUL_COMPONENT
