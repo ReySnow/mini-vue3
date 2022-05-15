@@ -31,6 +31,9 @@ export const App = {
                     count: 1,
                     onAdd: this.onAdd,
                     onAddFoo: this.onAddFoo
+                }, {
+                    header: ({ age }) => h('div', {}, 'header' + age),
+                    footer: () => h('div', {}, 'footer'),
                 })
             ]
         )
