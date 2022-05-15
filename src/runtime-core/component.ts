@@ -1,4 +1,5 @@
 import { shallowReadonly } from "../reactivity/reacticve"
+import { emit } from "./componentEmit"
 import { initprops } from "./componentProps"
 import { publicInstanceHandlers } from "./componentPublicInstance"
 
@@ -8,8 +9,11 @@ export function createComponentInstance(vnode) {
         vnode,
         type: vnode.type,// 方便直接从实例上取类型
         setupState: {},// 保存状态 setup 返回值
-        props: {}
+        props: {},
+        emit: () => { }
     }
+
+    instance.emit = emit.bind(null, instance) as any
 
     return instance
 }
@@ -33,7 +37,9 @@ function setupStatefulComponent(instance: any) {
     const { setup } = component
     if (setup) {
         // setup 返回对象或函数
-        const setupResult = setup(shallowReadonly(instance.props))
+        const setupResult = setup(shallowReadonly(instance.props), {
+            emit: instance.emit,
+        })
 
         handleSetupResult(instance, setupResult)
     }

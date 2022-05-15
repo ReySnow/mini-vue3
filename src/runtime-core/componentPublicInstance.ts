@@ -8,9 +8,7 @@ export const publicInstanceHandlers = {
     get({ _: instance }, key) {
         // 处理this取值
         const { setupState, props } = instance
-        if (key in setupState) {
-            return setupState[key]
-        }
+
         if (hasOwn(setupState, key)) {
             return setupState[key]
         } else if (hasOwn(props, key)) {
