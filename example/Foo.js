@@ -1,8 +1,11 @@
-import { h, renderSlots } from "../lib/mini-vue.esm.js"
+import { h, renderSlots, getCurrentInstance } from "../lib/mini-vue.esm.js"
 
 export const Foo = {
+    name: "Foo",
     setup(props, { emit }) {
         console.log(props)
+        const instance = getCurrentInstance()
+        console.log(instance);
 
         const emitAdd = () => {
             console.log('emit');
