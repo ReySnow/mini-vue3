@@ -9,6 +9,7 @@ export function initSlots(instance, children) {
     }
 }
 
+// 给slots赋值
 function normalizeObjectSlots(slots: any, children: any) {
     for (let key in children) {
         const value = children[key]

@@ -1,6 +1,9 @@
 import { isArray, isObject } from "../shared/index"
 import { shapeFlags } from "./shapeFlags"
 
+export const Fragment = Symbol('Fragment')
+export const Text = Symbol('Text')
+
 // 创建虚拟节点
 export function createVNode(type, props?, children?) {
     const vnode = {
@@ -24,6 +27,11 @@ export function createVNode(type, props?, children?) {
     }
 
     return vnode
+}
+
+// 创建text类型的虚拟节点 渲染text文本
+export function createTextVNode(text: string) {
+    return createVNode(Text, {}, text)
 }
 
 function getShapeFlage(type: any) {

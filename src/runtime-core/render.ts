@@ -1,6 +1,6 @@
-import { isObject } from "../shared/index"
 import { createComponentInstance, setupComponent } from "./component"
 import { shapeFlags } from "./shapeFlags"
+import { Fragment, Text } from "./vnode";
 
 export function render(vnode, container: any) {
     // 递归处理
@@ -9,12 +9,33 @@ export function render(vnode, container: any) {
 
 function patch(vnode: any, container: any) {
     // 判断vnode类型 component element
-    const { shapeFlag } = vnode
-    if (shapeFlag & shapeFlags.ELELEMT) {
-        processElement(vnode, container)
-    } else if (shapeFlag & shapeFlags.STATEFUL_COMPONENT) {
-        processComponent(vnode, container)
+    const { shapeFlag, type } = vnode
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container);
+            break;
+        case Text:
+            processText(vnode, container);
+            break;
+        default:
+            if (shapeFlag & shapeFlags.ELELEMT) {
+                processElement(vnode, container)
+            } else if (shapeFlag & shapeFlags.STATEFUL_COMPONENT) {
+                processComponent(vnode, container)
+            }
     }
+}
+
+// 处理fragment，只渲染children
+function processFragment(vnode: any, container: any) {
+    mountChildren(vnode, container)
+}
+
+// 渲染text文本
+function processText(vnode: any, container: any) {
+    const { children } = vnode
+    const textNode = vnode.el = document.createTextNode(children)
+    container.append(textNode)
 }
 
 // 处理类型为element的vnode
@@ -25,7 +46,7 @@ function processElement(vnode: any, container: any) {
 // 挂载elememt
 function mountElement(vnode: any, container: any) {
     const { children, props, type, shapeFlag } = vnode
-    // type = div p span
+    // type = div p span  赋值给vnode.el -> this.$el 取值
     const el = vnode.el = document.createElement(type)
 
     if (shapeFlag & shapeFlags.TEXT_CHILDREN) {
