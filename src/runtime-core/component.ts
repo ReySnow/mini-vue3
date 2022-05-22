@@ -7,14 +7,17 @@ import { initSlots } from "./componentSlots"
 let currentInstance = null
 
 // 创建组件实例
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
     const instance = {
         vnode,
         type: vnode.type,// 方便直接从实例上取类型
         setupState: {},// 保存状态 setup 返回值
         props: {},
         emit: () => { },
-        slots: {}
+        slots: {},
+        // 使用父级的来初始化 原形链 provide-inject 功能
+        provides: parent ? Object.create(parent.provides) : {},
+        parent
     }
 
     instance.emit = emit.bind(null, instance) as any
