@@ -1,3 +1,4 @@
+import { effect } from "../reactivity";
 import { createComponentInstance, setupComponent } from "./component"
 import { createAppAPI } from "./createApp";
 import { shapeFlags } from "./shapeFlags"
@@ -5,48 +6,57 @@ import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
     // 根据不同的平台传入对应的创建元素，插入元素，处理props 方法
-    const { createElement, patchProp, insert } = options
-
+    const { createElement: HostCreateElement, patchProp: HostPatchProp, insert: hostInsert } = options
 
     function render(vnode, container: any) {
         // 递归处理
-        patch(vnode, container, null)
+        patch(null, vnode, container, null)
     }
 
-    function patch(vnode: any, container: any, parentCompontent: any) {
+    // n1老的 n2新的
+    function patch(n1, n2: any, container: any, parentCompontent: any) {
         // 判断vnode类型 component element
-        const { shapeFlag, type } = vnode
+        const { shapeFlag, type } = n2
         switch (type) {
             case Fragment:
-                processFragment(vnode, container, parentCompontent);
+                processFragment(n1, n2, container, parentCompontent);
                 break;
             case Text:
-                processText(vnode, container);
+                processText(n1, n2, container);
                 break;
             default:
                 if (shapeFlag & shapeFlags.ELELEMT) {
-                    processElement(vnode, container, parentCompontent)
+                    processElement(n1, n2, container, parentCompontent)
                 } else if (shapeFlag & shapeFlags.STATEFUL_COMPONENT) {
-                    processComponent(vnode, container, parentCompontent)
+                    processComponent(n1, n2, container, parentCompontent)
                 }
         }
     }
 
     // 处理fragment，只渲染children
-    function processFragment(vnode: any, container: any, parentCompontent) {
-        mountChildren(vnode, container, parentCompontent)
+    function processFragment(n1, n2: any, container: any, parentCompontent) {
+        mountChildren(n2, container, parentCompontent)
     }
 
     // 渲染text文本
-    function processText(vnode: any, container: any) {
-        const { children } = vnode
-        const textNode = vnode.el = document.createTextNode(children)
+    function processText(n1, n2: any, container: any) {
+        const { children } = n2
+        const textNode = n2.el = document.createTextNode(children)
         container.append(textNode)
     }
 
     // 处理类型为element的vnode
-    function processElement(vnode: any, container: any, parentCompontent) {
-        mountElement(vnode, container, parentCompontent)
+    function processElement(n1, n2: any, container: any, parentCompontent) {
+        if (!n1) {
+            mountElement(n2, container, parentCompontent)
+        } else {
+            patchElement(n1, n2, container)
+        }
+    }
+
+    function patchElement(n1, n2, container) {
+        console.log('patchElement', n1, n2);
+
     }
 
     // 挂载elememt
@@ -54,7 +64,7 @@ export function createRenderer(options) {
         const { children, props, type, shapeFlag } = vnode
         // type = div p span  赋值给vnode.el -> this.$el 取值
         // const el = vnode.el = document.createElement(type)
-        const el = vnode.el = createElement(type)
+        const el = vnode.el = HostCreateElement(type)
 
         if (shapeFlag & shapeFlags.TEXT_CHILDREN) {
             el.textContent = children
@@ -71,23 +81,23 @@ export function createRenderer(options) {
             // } else {
             //     el.setAttribute(key, val)
             // }
-            patchProp(el, key, val)
+            HostPatchProp(el, key, val)
         }
         // container.append(el)
-        insert(el, container)
+        hostInsert(el, container)
     }
 
     // 处理子节点
-    function mountChildren(vnode: any, container: any, parentCompontent) {
-        vnode.children.forEach(element => {
+    function mountChildren(n2: any, container: any, parentCompontent) {
+        n2.children.forEach(element => {
             // 递归处理子节点
-            patch(element, container, parentCompontent)
+            patch(null, element, container, parentCompontent)
         });
     }
 
     // 处理类型为component的vnode
-    function processComponent(vnode: any, container: any, parentCompontent) {
-        mountComponent(vnode, container, parentCompontent)
+    function processComponent(n1, n2: any, container: any, parentCompontent) {
+        mountComponent(n2, container, parentCompontent)
     }
 
     // 挂载component
@@ -103,10 +113,26 @@ export function createRenderer(options) {
         // finishComponent 中设置了render
         // subtree 就是虚拟节点
         // 将proxy绑定到this上
-        const subtree = instance.render.call(instance.proxy)
-        patch(subtree, container, instance)
+        effect(() => {
+            if (!instance.isMounleted) {
+                const { proxy } = instance
+                const subTree = instance.subTree = instance.render.call(proxy)
 
-        initialVNode.el = subtree.el
+                patch(null, subTree, container, instance)
+
+                initialVNode.el = subTree.el
+
+                instance.isMounleted = true
+            } else {
+                console.log('update');
+                const { proxy } = instance
+                const subTree = instance.render.call(proxy)
+                const prevSubTree = instance.subTree
+                instance.subTree = subTree
+                patch(prevSubTree, subTree, container, instance)
+
+            }
+        })
     }
 
     return {

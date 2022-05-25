@@ -1,3 +1,4 @@
+import { proxyRefs } from "../reactivity"
 import { shallowReadonly } from "../reactivity/reacticve"
 import { emit } from "./componentEmit"
 import { initprops } from "./componentProps"
@@ -17,7 +18,9 @@ export function createComponentInstance(vnode, parent) {
         slots: {},
         // 使用父级的来初始化 原形链 provide-inject 功能
         provides: parent ? Object.create(parent.provides) : {},
-        parent
+        parent,
+        isMounleted: false,
+        subTree: {}
     }
 
     instance.emit = emit.bind(null, instance) as any
@@ -58,7 +61,8 @@ function setupStatefulComponent(instance: any) {
 
 function handleSetupResult(instance, setupResult) {
     if (typeof setupResult === 'object') {
-        instance.setupState = setupResult
+        // proxyRefs 使render中的ref可以直接取值
+        instance.setupState = proxyRefs(setupResult)
     }
 
     finishComponent(instance)
