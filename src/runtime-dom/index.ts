@@ -5,13 +5,17 @@ const createElement = (type) => {
     return document.createElement(type)
 }
 
-const patchProp = (el, key, val) => {
+const patchProp = (el, key, prevVal, nextVal) => {
     const isOn = (key: string) => /^on[A-Z]/.test(key)
     if (isOn(key)) {
         const even = key.slice(2).toLocaleLowerCase()
-        el.addEventListener(even, val)
+        el.addEventListener(even, nextVal)
     } else {
-        el.setAttribute(key, val)
+        if (nextVal === undefined || nextVal === null) {
+            el.removeAttribute(key, nextVal)
+        } else {
+            el.setAttribute(key, nextVal)
+        }
     }
 }
 

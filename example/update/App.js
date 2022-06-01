@@ -5,9 +5,29 @@ export const App = {
         const onClick = () => {
             count.value++
         }
+
+        const props = ref({
+            foo: 'foo',
+            bar: 'bar'
+        })
+        const onChangeProps1 = () => {
+            props.value.foo = 'foo1'
+        }
+        const onChangeProps2 = () => {
+            props.value.foo = undefined
+        }
+        const onChangeProps3 = () => {
+            props.value = {
+                foo: 'foo'
+            }
+        }
         return {
             count,
-            onClick
+            onClick,
+            props,
+            onChangeProps1,
+            onChangeProps2,
+            onChangeProps3
         }
     },
     render() {
@@ -15,6 +35,7 @@ export const App = {
             "div",
             {
                 id: "root",
+                ...this.props
             },
             [
                 h("div", {}, "count:" + this.count), // 依赖收集
@@ -24,6 +45,27 @@ export const App = {
                         onClick: this.onClick,
                     },
                     "click"
+                ),
+                h(
+                    "button",
+                    {
+                        onClick: this.onChangeProps1,
+                    },
+                    "changeProps 修改值"
+                ),
+                h(
+                    "button",
+                    {
+                        onClick: this.onChangeProps2,
+                    },
+                    "设置 undefined 删除"
+                ),
+                h(
+                    "button",
+                    {
+                        onClick: this.onChangeProps3,
+                    },
+                    "删除 bar"
                 ),
             ]
         );

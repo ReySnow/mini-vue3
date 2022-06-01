@@ -1,4 +1,5 @@
 import { effect } from "../reactivity";
+import { EMPTY_OBJ } from "../shared";
 import { createComponentInstance, setupComponent } from "./component"
 import { createAppAPI } from "./createApp";
 import { shapeFlags } from "./shapeFlags"
@@ -56,7 +57,33 @@ export function createRenderer(options) {
 
     function patchElement(n1, n2, container) {
         console.log('patchElement', n1, n2);
+        let oldProps = n1.props || EMPTY_OBJ
+        let newProps = n2.props || EMPTY_OBJ
+        // 此时n2没有el
+        let el = n2.el = n1.el
+        patchProps(el, oldProps, newProps)
+    }
 
+    // 更新props
+    function patchProps(el, oldProps, newProps) {
+        if (oldProps !== newProps) {
+            for (const key in newProps) {
+                const prevProp = oldProps[key]
+                const nextProp = newProps[key]
+                if (prevProp !== nextProp) {
+                    HostPatchProp(el, key, prevProp, nextProp)
+                }
+            }
+
+            if (oldProps !== EMPTY_OBJ) {
+                for (const key in oldProps) {
+                    // 新的props中没有这个属性， 删除
+                    if (!(key in newProps)) {
+                        HostPatchProp(el, key, oldProps[key], null)
+                    }
+                }
+            }
+        }
     }
 
     // 挂载elememt
@@ -81,7 +108,7 @@ export function createRenderer(options) {
             // } else {
             //     el.setAttribute(key, val)
             // }
-            HostPatchProp(el, key, val)
+            HostPatchProp(el, key, null, val)
         }
         // container.append(el)
         hostInsert(el, container)
@@ -113,6 +140,8 @@ export function createRenderer(options) {
         // finishComponent 中设置了render
         // subtree 就是虚拟节点
         // 将proxy绑定到this上
+        // 组件的render函数会使用响应式对象 this.xxxx 此时会收集依赖
+        // 当响应式对象发生改变的时候会在次执行
         effect(() => {
             if (!instance.isMounleted) {
                 const { proxy } = instance
