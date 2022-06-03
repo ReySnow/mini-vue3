@@ -23,11 +23,25 @@ const insert = (el, parent) => {
     parent.append(el)
 }
 
+// 移除一个元素
+const remove = (child) => {
+    const parent = child.parentNode
+    if (parent) {
+        parent.removeChild(child)
+    }
+}
+
+const setElementText = (el, text) => {
+    el.textContent = text
+}
+
 // 创建 runtime-dom 的自定义渲染器
 const renderer: any = createRenderer({
     createElement,
     patchProp,
-    insert
+    insert,
+    remove,
+    setElementText
 })
 
 // 导出 runtime-dom 的createApp
