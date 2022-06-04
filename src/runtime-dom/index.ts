@@ -19,8 +19,9 @@ const patchProp = (el, key, prevVal, nextVal) => {
     }
 }
 
-const insert = (el, parent) => {
-    parent.append(el)
+const insert = (child, parent, anchor) => {
+    // parent.append(el)
+    parent.insertBefore(child, anchor || null)
 }
 
 // 移除一个元素
