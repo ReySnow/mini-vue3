@@ -148,6 +148,45 @@ export function createRenderer(options) {
                 hostRemove(c1[i].el)
                 i++
             }
+        } else {
+            // 对比中间的
+            let s1 = i
+            let s2 = i
+            const toBePatched = e2 - s2 + 1;// 需要被比较的
+            let patched = 0
+            // 将新的里面的按照 key->index 保存起来
+            const keyToNewIndexMap = new Map()
+            for (let i = s2; i <= e2; i++) {
+                keyToNewIndexMap.set(c2[i].key, i)
+            }
+            for (let i = s1; i <= e1; i++) {
+                const prevChild = c1[i]
+
+                // 中间部分，老的比新的多， 那么多出来的直接就可以被干掉(优化删除逻辑)
+                if (patched >= toBePatched) {
+                    hostRemove(prevChild.el)
+                    continue
+                }
+
+                let newIndex
+                // 老的是否还在新的里面
+                if (prevChild.key != null) {
+                    newIndex = keyToNewIndexMap.get(prevChild.key)
+                } else {
+                    for (let j = s2; i <= e2; j++) {
+                        if (isSameVnodeType(prevChild, c2[j])) {
+                            newIndex = j
+                            break
+                        }
+                    }
+                }
+                if (newIndex) {
+                    patch(prevChild, c2[newIndex], container, parentComponent, null)
+                    patched++
+                } else {
+                    hostRemove(prevChild.el)
+                }
+            }
         }
     }
 
