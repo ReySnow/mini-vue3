@@ -14,6 +14,7 @@ export function createComponentInstance(vnode, parent) {
         type: vnode.type,// 方便直接从实例上取类型
         setupState: {},// 保存状态 setup 返回值
         props: {},
+        next: null,// 下次需要更新的虚拟节点
         emit: () => { },
         slots: {},
         // 使用父级的来初始化 原形链 provide-inject 功能
