@@ -3,6 +3,7 @@ import { EMPTY_OBJ } from "../shared";
 import { createComponentInstance, setupComponent } from "./component"
 import { shouldComponentUpdate } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
+import { queueJobs } from "./scheduler";
 import { shapeFlags } from "./shapeFlags"
 import { Fragment, Text } from "./vnode";
 
@@ -342,7 +343,7 @@ export function createRenderer(options) {
 
                 instance.isMounleted = true
             } else {
-                console.log('update');
+                console.log('update-effect');
                 // vnode 是之前的，next是下次新的
                 const { next, vnode } = instance
                 if (next) {
@@ -359,6 +360,10 @@ export function createRenderer(options) {
 
                 patch(prevSubTree, subTree, container, instance, anchor)
 
+            }
+        }, {
+            scheduler() {
+                queueJobs(instance.update)
             }
         })
     }
