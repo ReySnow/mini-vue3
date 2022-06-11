@@ -1,5 +1,10 @@
 import { NodeTypes } from "./ast"
 
+const enum TagTypes {
+    Start,
+    End
+}
+
 export function baseParse(content) {
     const context = createParseContext(content)
     return createRoot(parseChildren(context))
@@ -8,12 +13,38 @@ export function baseParse(content) {
 function parseChildren(context) {
     const nodes: any[] = []
     let node
-    if (context.source.startsWith('{{')) {
+    let s = context.source
+    if (s.startsWith('{{')) {
         node = paresInterpolation(context)
+    } else if (s[0] === '<') {
+        node = parseElement(context)
     }
     nodes.push(node)
     return nodes
 }
+
+function parseElement(context: any): any {
+    const element = parseTag(context, TagTypes.Start)
+    parseTag(context, TagTypes.End)
+
+    return element
+}
+
+function parseTag(context, type) {
+    const match: any = /^\<\/?([a-z]*)/i.exec(context.source)
+    const tag = match[1]
+
+    advanceBy(context, match[0].length)
+    advanceBy(context, 1)// >右尖括号
+
+    if (type === TagTypes.End) return
+
+    return {
+        type: NodeTypes.ELEMENT,
+        tag
+    }
+}
+
 
 function paresInterpolation(context) {
     const openDelimiter = '{{'
