@@ -7,29 +7,57 @@ const enum TagTypes {
 
 export function baseParse(content) {
     const context = createParseContext(content)
-    return createRoot(parseChildren(context))
+    return createRoot(parseChildren(context, []))
 }
 
-function parseChildren(context) {
+function parseChildren(context, ancestors) {
     const nodes: any[] = []
-    let node
-    let s = context.source
-    if (s.startsWith('{{')) {
-        node = paresInterpolation(context)
-    } else if (s[0] === '<') {
-        node = parseElement(context)
-    }
+    while (!isEnded(context, ancestors)) {
+        let node
+        let s = context.source
+        if (s.startsWith('{{')) {
+            node = paresInterpolation(context)
+        } else if (s[0] === '<') {
+            if (/[a-z]/i.test(s[1])) {
+                node = parseElement(context, ancestors)
+            }
+        }
 
-    if (!node) {
-        node = parseText(context)
+        if (!node) {
+            node = parseText(context)
+        }
+        nodes.push(node)
     }
-
-    nodes.push(node)
     return nodes
 }
 
+// 判断是否结束
+function isEnded(context, ancestors) {
+    let s = context.source
+    if (s.startsWith('</')) {
+        // 只要遇到结束标签就结束  从开始标签里面找
+        for (let i = ancestors.length - 1; i >= 0; i--) {
+            if (startsWithEndTagOpen(s, ancestors[i].tag)) {
+                return true
+            }
+        }
+    }
+    // 没有需要解析的了
+    return !s
+}
+
 function parseText(context: any): any {
-    const content = parseTextData(context, context.source.length)
+    let endIndex = context.source.length
+    let endTokens = ['{{', '<']// 解析text结束标识
+    for (let item of endTokens) {
+        let index = context.source.indexOf(item)
+        if (index !== -1 && index < endIndex) {
+            endIndex = index
+        }
+    }
+
+    const content = parseTextData(context, endIndex)
+
     return {
         type: NodeTypes.TEXT,
         content
@@ -42,11 +70,25 @@ function parseTextData(context, length) {
     return content
 }
 
-function parseElement(context: any): any {
-    const element = parseTag(context, TagTypes.Start)
-    parseTag(context, TagTypes.End)
+function parseElement(context: any, ancestors): any {
+    const element: any = parseTag(context, TagTypes.Start)
+    ancestors.push(element)
+    element.children = parseChildren(context, ancestors)
+
+    // 判断结束标签是否与开始标签一样
+    if (startsWithEndTagOpen(context.source, element.tag)) {
+        ancestors.pop()
+        parseTag(context, TagTypes.End)
+    } else {
+        throw new Error(`缺少结束标签:${element.tag}`)
+    }
 
     return element
+}
+
+function startsWithEndTagOpen(source, tag) {
+    return source.startsWith('</')
+        && source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
 }
 
 function parseTag(context, type) {
