@@ -1,7 +1,12 @@
 
-export function transform(root, options) {
+export function transform(root, options = {}) {
     const context = createTransformContext(root, options)
     transformNode(root, context)
+    creteRootCodegen(root)
+}
+
+function creteRootCodegen(root: any) {
+    root.codegenNode = root.children[0]
 }
 
 function transformNode(node: any, context) {
