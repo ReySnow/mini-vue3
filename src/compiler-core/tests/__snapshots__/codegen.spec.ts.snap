@@ -1,5 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`codegen should element 1`] = `
+"const { toDisplayString: _toDisplayString, createElementBlock: _createElementBlock } = Vue
+return function render(_ctx, _catch){return _createElementBlock('div', null, 'hi,' + _toDisplayString(_ctx.message))}"
+`;
+
 exports[`codegen should interpolation 1`] = `
 "const { toDisplayString: _toDisplayString } = Vue
 return function render(_ctx, _catch){return _toDisplayString(_ctx.message)}"

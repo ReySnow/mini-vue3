@@ -4,13 +4,15 @@ export const isObject = (val) => {
     return val !== null && typeof val === 'object'
 }
 
+export const isString = (val) => typeof val === 'string'
+
+export const isArray = Array.isArray
+
 export const EMPTY_OBJ = {}
 
 export const hasChanged = (val, newVal) => {
     return !Object.is(val, newVal)
 }
-
-export const isArray = Array.isArray
 
 export const hasOwn = (val, key) => Object.prototype.hasOwnProperty.call(val, key)
 

@@ -11,7 +11,12 @@ export function transform(root, options = {}) {
 }
 
 function creteRootCodegen(root: any) {
-    root.codegenNode = root.children[0]
+    let child = root.children[0]
+    if (child.type === NodeTypes.ELEMENT) {
+        root.codegenNode = child.codegenNode
+    } else {
+        root.codegenNode = root.children[0]
+    }
 }
 
 function transformNode(node: any, context) {
@@ -19,10 +24,15 @@ function transformNode(node: any, context) {
     //     node.content = node.content + ' mini-vue'
     // }
     // 通过外部传入的options实现对节点的处理，扩展性高
+    // 进入时执行
     const nodeTransforms = context.nodeTransforms
+    const exitFns: any = []
     for (let i = 0; i < nodeTransforms.length; i++) {
         const transform = nodeTransforms[i];
-        transform(node)
+        const onExit = transform(node, context)
+        if (onExit) {
+            exitFns.push(onExit)
+        }
     }
 
     // 处理节点
@@ -37,6 +47,12 @@ function transformNode(node: any, context) {
             break
         default:
             break;
+    }
+
+    // 有的需要在退出时执行
+    let i = exitFns.length
+    while (i--) {
+        exitFns[i]()
     }
 }
 

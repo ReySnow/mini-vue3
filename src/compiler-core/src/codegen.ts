@@ -1,5 +1,6 @@
+import { isString } from "../../shared"
 import { NodeTypes } from "./ast"
-import { helperMapNames, TO_DISPLAY_STRING } from "./runtimeHelpers"
+import { CREAETE_ELEMENT_BLOCK, helperMapNames, TO_DISPLAY_STRING } from "./runtimeHelpers"
 
 export function genreate(ast) {
     const context = createCodegenContext()
@@ -43,10 +44,40 @@ function genNode(node, context: any) {
             break;
         case NodeTypes.SIMPLE_EXPRESSION:
             genExpression(node, context)
-            break
+            break;
+        case NodeTypes.ELEMENT:
+            genElement(node, context)
+            break;
+        case NodeTypes.COMPOUND_EXPRESSION:
+            genCompoundExpression(node, context)
+            break;
         default:
             break;
     }
+}
+
+// 处理组合类型的节点
+function genCompoundExpression(node: any, context: any) {
+    const { push } = context
+    const { children } = node
+    for (let item of children) {
+        if (isString(item)) {
+            push(item)
+        } else {
+            genNode(item, context)
+        }
+    }
+}
+
+// 处理节点类型
+function genElement(node, context) {
+    const { push, helper } = context
+    const { tag, children, props } = node
+    push(`${helper(CREAETE_ELEMENT_BLOCK)}('${tag}', ${props || 'null'}, `)
+    for (let item of children) {
+        genNode(item, context)
+    }
+    push(')')
 }
 
 // 处理插值中的表达式 此时已经被transform处理过了
