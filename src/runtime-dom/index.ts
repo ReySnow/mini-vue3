@@ -1,3 +1,5 @@
+// 依赖关系 runtime-dom -> runtime-core
+export * from '../runtime-core'
 
 import { createRenderer } from "../runtime-core";
 
@@ -49,6 +51,3 @@ const renderer: any = createRenderer({
 export function createApp(...args) {
     return renderer.createApp(...args)
 }
-
-// runtime-dom -> runtime-core
-export * from '../runtime-core'

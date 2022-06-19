@@ -72,6 +72,12 @@ function handleSetupResult(instance, setupResult) {
 function finishComponent(instance: any) {
     const component = instance.type
 
+    if (compiler && !component.render) {
+        if (component.template) {
+            // 通过compiler生成render函数
+            component.render = compiler(component.template)
+        }
+    }
     if (component.render) {
         instance.render = component.render
     }
@@ -83,4 +89,10 @@ function setCurrentInstance(instance: any) {
 
 export function getCurrentInstance() {
     return currentInstance
+}
+
+let compiler;
+// 将compile传入进来 一开始的时候就会自动生成
+export function registerRuntimeCompiler(_compiler) {
+    compiler = _compiler
 }

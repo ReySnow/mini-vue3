@@ -335,7 +335,8 @@ export function createRenderer(options) {
         instance.update = effect(() => {
             if (!instance.isMounleted) {
                 const { proxy } = instance
-                const subTree = instance.subTree = instance.render.call(proxy)
+                // 第二个proxy作为render的第一个参数
+                const subTree = instance.subTree = instance.render.call(proxy, proxy)
 
                 patch(null, subTree, container, instance, anchor)
 
@@ -352,7 +353,7 @@ export function createRenderer(options) {
                     updateComponentPreRender(instance, next)
                 }
                 const { proxy } = instance
-                const subTree = instance.render.call(proxy)
+                const subTree = instance.render.call(proxy, proxy)
                 const prevSubTree = instance.subTree
                 instance.subTree = subTree
                 console.log('prevSubTree', prevSubTree, subTree);
