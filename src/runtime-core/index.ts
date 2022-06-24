@@ -1,6 +1,6 @@
 export { h } from './h'
 export { renderSlots } from './helpers/renderSlots'
-export { createTextVNode, createElementBlock } from './vnode'
+export { createTextVNode, createElementVnode } from './vnode'
 export { getCurrentInstance, registerRuntimeCompiler } from './component'
 export { provide, inject } from './apidInject'
 export { createRenderer } from './render'

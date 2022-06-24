@@ -1,6 +1,6 @@
 import { isString } from "../../shared"
 import { NodeTypes } from "./ast"
-import { CREAETE_ELEMENT_BLOCK, helperMapNames, TO_DISPLAY_STRING } from "./runtimeHelpers"
+import { CREAETE_ELEMENT_VNODE, helperMapNames, TO_DISPLAY_STRING } from "./runtimeHelpers"
 
 export function genreate(ast) {
     const context = createCodegenContext()
@@ -73,7 +73,7 @@ function genCompoundExpression(node: any, context: any) {
 function genElement(node, context) {
     const { push, helper } = context
     const { tag, children, props } = node
-    push(`${helper(CREAETE_ELEMENT_BLOCK)}('${tag}', ${props || 'null'}, `)
+    push(`${helper(CREAETE_ELEMENT_VNODE)}('${tag}', ${props || 'null'}, `)
     for (let item of children) {
         genNode(item, context)
     }

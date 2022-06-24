@@ -1,4 +1,4 @@
-import { CREAETE_ELEMENT_BLOCK } from "./runtimeHelpers";
+import { CREAETE_ELEMENT_VNODE } from "./runtimeHelpers";
 
 export const enum NodeTypes {
     INTERPOLATION,
@@ -10,7 +10,7 @@ export const enum NodeTypes {
 }
 
 export function createVNodeCall(context, tag, props, children) {
-    context.helper(CREAETE_ELEMENT_BLOCK)
+    context.helper(CREAETE_ELEMENT_VNODE)
 
     return {
         type: NodeTypes.ELEMENT,
